@@ -33,8 +33,7 @@ export async function discoverChecks(
 
     for (const sha of heads) {
         if (samples.length === samplePulls) break
-        const runs = await api.checkRuns(repo, sha)
-        const names = reportedChecks(runs)
+        const names = reportedChecks(await api.jobs(repo, sha))
         if (names.size > 0) samples.push(names)
     }
 

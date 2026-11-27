@@ -1,10 +1,10 @@
 import { throttling } from '@octokit/plugin-throttling'
 import { Octokit } from '@octokit/rest'
 
-import type { CheckRun, Ruleset, RulesetBody } from './rules.js'
+import type { Job, Ruleset, RulesetBody } from './rules.js'
 
 export interface Api {
-    checkRuns: (repo: string, sha: string) => Promise<CheckRun[]>
+    jobs: (repo: string, sha: string) => Promise<Job[]>
     mergedPullHeads: (repo: string) => Promise<string[]>
     ownRepos: () => Promise<RepoRef[]>
     ruleset: (repo: string, id: number) => Promise<Ruleset>
@@ -32,15 +32,25 @@ export function createApi(token: string, owner: string): Api {
     })
 
     return {
-        checkRuns: async (repo, sha) => {
-            const { data } = await octokit.checks.listForRef({
+        jobs: async (repo, sha) => {
+            const { data } = await octokit.actions.listWorkflowRunsForRepo({
+                head_sha: sha,
                 owner,
-                per_page: 100,
-                ref: sha,
+                per_page: 20,
                 repo,
             })
+            const jobs: Job[] = []
+            for (const run of data.workflow_runs) {
+                const listed = await octokit.actions.listJobsForWorkflowRun({
+                    owner,
+                    per_page: 100,
+                    repo,
+                    run_id: run.id,
+                })
+                jobs.push(...listed.data.jobs)
+            }
 
-            return data.check_runs as unknown as CheckRun[]
+            return jobs
         },
         mergedPullHeads: async repo => {
             const { data } = await octokit.pulls.list({

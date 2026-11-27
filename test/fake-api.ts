@@ -1,10 +1,10 @@
 import type { Api } from '../src/api.js'
-import type { CheckRun, Ruleset, RulesetBody } from '../src/rules.js'
+import type { Job, Ruleset, RulesetBody } from '../src/rules.js'
 
 export interface FakeState {
-    checkRuns?: Record<string, CheckRun[]>
     failOn?: string[]
     heads?: Record<string, string[]>
+    jobs?: Record<string, Job[]>
     privateRepos?: string[]
     repos?: string[]
     rulesets?: Record<string, Ruleset[]>
@@ -16,15 +16,15 @@ export interface Written {
     repo: string
 }
 
-export function actionsRun(name: string, conclusion = 'success'): CheckRun {
-    return { app: { slug: 'github-actions' }, conclusion, name }
+export function actionsRun(name: string, conclusion = 'success'): Job {
+    return { conclusion, name }
 }
 
 export function fakeApi(state: FakeState): { api: Api; written: Written[] } {
     const written: Written[] = []
     const api: Api = {
-        checkRuns: (repo, sha) =>
-            Promise.resolve(state.checkRuns?.[`${repo}@${sha}`] ?? []),
+        jobs: (repo, sha) =>
+            Promise.resolve(state.jobs?.[`${repo}@${sha}`] ?? []),
         mergedPullHeads: repo => Promise.resolve(state.heads?.[repo] ?? []),
         ownRepos: () =>
             Promise.resolve(

@@ -5644,14 +5644,24 @@ function createApi(token2, owner2) {
     }
   });
   return {
-    checkRuns: async (repo, sha) => {
-      const { data } = await octokit.checks.listForRef({
+    jobs: async (repo, sha) => {
+      const { data } = await octokit.actions.listWorkflowRunsForRepo({
+        head_sha: sha,
         owner: owner2,
-        per_page: 100,
-        ref: sha,
+        per_page: 20,
         repo
       });
-      return data.check_runs;
+      const jobs = [];
+      for (const run2 of data.workflow_runs) {
+        const listed = await octokit.actions.listJobsForWorkflowRun({
+          owner: owner2,
+          per_page: 100,
+          repo,
+          run_id: run2.id
+        });
+        jobs.push(...listed.data.jobs);
+      }
+      return jobs;
     },
     mergedPullHeads: async (repo) => {
       const { data } = await octokit.pulls.list({
@@ -5753,9 +5763,9 @@ function intersect(samples) {
   if (!first) return [];
   return [...first].filter((name) => rest.every((other) => other.has(name))).sort();
 }
-function reportedChecks(runs) {
+function reportedChecks(jobs) {
   return new Set(
-    runs.filter((run2) => run2.app?.slug === "github-actions").filter((run2) => run2.conclusion !== "skipped").map((run2) => run2.name)
+    jobs.filter((job) => job.conclusion !== "skipped").map((job) => job.name)
   );
 }
 
@@ -5765,8 +5775,7 @@ async function discoverChecks(api, repo, samplePulls) {
   const samples = [];
   for (const sha of heads) {
     if (samples.length === samplePulls) break;
-    const runs = await api.checkRuns(repo, sha);
-    const names = reportedChecks(runs);
+    const names = reportedChecks(await api.jobs(repo, sha));
     if (names.size > 0) samples.push(names);
   }
   return intersect(samples);

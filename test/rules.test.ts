@@ -28,27 +28,14 @@ describe('intersect', () => {
 })
 
 describe('reportedChecks', () => {
-    test('keeps only GitHub Actions runs that were not skipped', () => {
+    test('drops the jobs that were skipped', () => {
         expect([
             ...reportedChecks([
-                {
-                    app: { slug: 'github-actions' },
-                    conclusion: 'success',
-                    name: 'check',
-                },
-                {
-                    app: { slug: 'github-actions' },
-                    conclusion: 'skipped',
-                    name: 'auto-merge',
-                },
-                {
-                    app: { slug: 'gitguardian' },
-                    conclusion: 'success',
-                    name: 'Security',
-                },
-                { app: null, conclusion: 'success', name: 'orphan' },
+                { conclusion: 'success', name: 'check / gate' },
+                { conclusion: 'skipped', name: 'auto-merge' },
+                { conclusion: 'failure', name: 'image' },
             ]),
-        ]).toEqual(['check'])
+        ]).toEqual(['check / gate', 'image'])
     })
 })
 

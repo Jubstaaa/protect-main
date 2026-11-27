@@ -46,13 +46,13 @@ Not from your workflow files. The job key in `ci.yml` is only the reported name 
 | `quality-gate`  | `quality-gate (bun) / gate`   |
 | `app`           | `app (rust + typescript)`     |
 
-A ruleset that requires a context nobody reports blocks every pull request in that repository, permanently. So the contexts come from the **check runs of recently merged pull requests**, which is by definition what a pull request will report.
+A ruleset that requires a context nobody reports blocks every pull request in that repository, permanently. So the contexts come from the **jobs of the workflow runs on recently merged pull requests**, which is by definition what a pull request will report. The Actions API is used rather than the Checks API: a fine-grained token cannot be granted read access to checks at all, and the job names it returns are identical — `quality-gate (bun) / gate` is reported the same way by both.
 
 Three rules keep that honest:
 
 - a check has to appear in **all** of the sampled pull requests (`sample-pulls`, 3 by default), so a job that only runs for Renovate never becomes required;
-- only GitHub Actions runs count, so a third-party app cannot block your merges by being removed from the repository;
-- skipped runs are ignored.
+- only GitHub Actions jobs count, so a third-party app cannot block your merges by being removed from the repository — the Actions API returns nothing else;
+- skipped jobs are ignored.
 
 And it never weakens what is already there: if nothing is discovered — a new repository, a quiet one — whatever the ruleset already requires is kept, and the repository still gets the deletion and force-push rules.
 
