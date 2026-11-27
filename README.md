@@ -91,7 +91,16 @@ It writes the same report to the job summary, and fails the job if any repositor
 
 ## The token
 
-Rulesets are an administration-scope write, and `GITHUB_TOKEN` has neither that scope nor any reach outside its own repository. Create a fine-grained personal access token with **Administration: Read and write** on the repositories you want covered — or on all of them, so new ones are included — and store it as a secret.
+Rulesets are an administration-scope write, and `GITHUB_TOKEN` has neither that scope nor any reach outside its own repository. Create a fine-grained personal access token on the repositories you want covered — or on all of them, so new ones are included — with three repository permissions, and store it as a secret:
+
+| Permission                         | Why                                       |
+| ---------------------------------- | ----------------------------------------- |
+| **Administration: Read and write** | the ruleset itself                        |
+| **Pull requests: Read**            | finding the recently merged pull requests |
+| **Checks: Read**                   | reading what those pull requests reported |
+
+A token with only the first works on public repositories, because their pull
+requests are readable by anyone, and returns 403 on every private one.
 
 Nothing else is needed; the token is the only credential, and it never leaves the runner.
 

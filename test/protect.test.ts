@@ -130,3 +130,14 @@ describe('run', () => {
         ])
     })
 })
+
+describe('read failures', () => {
+    test('a repository whose pull requests cannot be read is reported, not quietly left alone', async () => {
+        const { api, written } = fakeApi({ repos: ['locked'] })
+        api.mergedPullHeads = () =>
+            Promise.reject(new Error('403 Resource not accessible'))
+        const [result] = await run(api, options)
+        expect(result?.error).toContain('403')
+        expect(written).toHaveLength(0)
+    })
+})

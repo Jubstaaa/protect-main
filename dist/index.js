@@ -25408,11 +25408,11 @@ function reportedChecks(runs) {
 
 // src/protect.ts
 async function discoverChecks(api, repo, samplePulls) {
-  const heads = await api.mergedPullHeads(repo).catch(() => []);
+  const heads = await api.mergedPullHeads(repo);
   const samples = [];
   for (const sha of heads) {
     if (samples.length === samplePulls) break;
-    const runs = await api.checkRuns(repo, sha).catch(() => []);
+    const runs = await api.checkRuns(repo, sha);
     const names = reportedChecks(runs);
     if (names.size > 0) samples.push(names);
   }
