@@ -1,0 +1,10 @@
+{
+    "extends": "@jubstaa/config/tsconfig/node",
+    "compilerOptions": {
+        "target": "ES2023",
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "types": ["node"]
+    },
+    "include": ["src", "test"]
+}

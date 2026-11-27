@@ -31,9 +31,13 @@ inputs:
         required: false
         default: '3'
 
+outputs:
+    report:
+        description: One line per repository, saying what was created or updated and with which required checks.
+
 runs:
     using: node24
-    main: src/index.mjs
+    main: dist/index.js
 
 branding:
     icon: shield

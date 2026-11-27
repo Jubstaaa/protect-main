@@ -1,5 +1,41 @@
-export function buildRuleset({ checks, name, requirePullRequest }) {
-    const rules = [{ type: 'deletion' }, { type: 'non_fast_forward' }]
+export interface CheckRun {
+    app: null | { slug: string }
+    conclusion: null | string
+    name: string
+}
+
+export interface Ruleset {
+    id: number
+    name: string
+    rules?: RulesetRule[]
+}
+
+export interface RulesetBody {
+    conditions: { ref_name: { exclude: string[]; include: string[] } }
+    enforcement: string
+    name: string
+    rules: unknown[]
+    target: string
+}
+
+export interface RulesetRule {
+    parameters?: { required_status_checks?: { context: string }[] }
+    type: string
+}
+
+export function buildRuleset({
+    checks,
+    name,
+    requirePullRequest,
+}: {
+    checks: string[]
+    name: string
+    requirePullRequest: boolean
+}): RulesetBody {
+    const rules: unknown[] = [
+        { type: 'deletion' },
+        { type: 'non_fast_forward' },
+    ]
 
     if (requirePullRequest) {
         rules.push({
@@ -33,15 +69,15 @@ export function buildRuleset({ checks, name, requirePullRequest }) {
     }
 }
 
-export function existingChecks(ruleset) {
+export function existingChecks(ruleset: Ruleset | undefined): string[] {
     return (ruleset?.rules ?? [])
         .flatMap(rule => rule.parameters?.required_status_checks ?? [])
         .map(check => check.context)
         .sort()
 }
 
-export function intersect(sets) {
-    const [first, ...rest] = sets
+export function intersect(samples: Set<string>[]): string[] {
+    const [first, ...rest] = samples
     if (!first) return []
 
     return [...first]
@@ -49,7 +85,7 @@ export function intersect(sets) {
         .sort()
 }
 
-export function reportedChecks(runs) {
+export function reportedChecks(runs: CheckRun[]): Set<string> {
     return new Set(
         runs
             .filter(run => run.app?.slug === 'github-actions')

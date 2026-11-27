@@ -56,6 +56,25 @@ Three rules keep that honest:
 
 And it never weakens what is already there: if nothing is discovered — a new repository, a quiet one — whatever the ruleset already requires is kept, and the repository still gets the deletion and force-push rules.
 
+## Private repositories are never named
+
+The report names public repositories and only **counts** private ones:
+
+```
+acw-istanbul: updated [check, email-relay, image]
+configs: updated [check]
+9 private repositories: updated
+2 private repositories: created
+```
+
+That holds in the log, in the job summary and in the `report` output, and a
+private repository's name is stripped out of its own error message too. A
+scheduled run in a public repository would otherwise publish the names of every
+private repository you own, to anyone who opens the run.
+
+Being careful about this does not make the workflow's own repository a safe
+place for anything else, so keep the token in a secret and the workflow minimal.
+
 ## Inputs
 
 | Input                  | Default                        |                                                                                                                               |
@@ -79,8 +98,8 @@ Nothing else is needed; the token is the only credential, and it never leaves th
 ## From the command line
 
 ```sh
-GITHUB_TOKEN=<token> npx @jubstaa/protect-main --all
-GITHUB_TOKEN=<token> npx @jubstaa/protect-main --apply my-repo other-repo
+GITHUB_TOKEN=<token> npx github:Jubstaaa/protect-main --owner <account> --all
+GITHUB_TOKEN=<token> npx github:Jubstaaa/protect-main --owner <account> --apply my-repo other-repo
 ```
 
 Dry run unless you pass `--apply`. `--no-pull-request`, `--owner`, `--ruleset-name` and `--sample-pulls` match the action's inputs.

@@ -1,6 +1,6 @@
 {
     "name": "@jubstaa/protect-main",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "description": "Keep a branch ruleset in step with the checks your pull requests actually report, across every repository.",
     "license": "MIT",
     "type": "module",
@@ -9,24 +9,34 @@
         "url": "git+https://github.com/Jubstaaa/protect-main.git"
     },
     "bin": {
-        "protect-main": "./bin/protect-main.mjs"
+        "protect-main": "./dist/cli.js"
     },
     "files": [
         "action.yml",
-        "bin",
-        "src"
+        "dist"
     ],
     "scripts": {
+        "build": "esbuild src/index.ts src/cli.ts --bundle --platform=node --target=node24 --format=esm --outdir=dist --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\"",
         "format": "prettier . --write",
         "format:check": "prettier . --check",
         "lint": "eslint .",
-        "test": "node --test test/",
-        "audit": "npm audit --audit-level=high"
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run",
+        "audit": "bun audit --audit-level=high"
+    },
+    "dependencies": {
+        "@actions/core": "^3.0.1",
+        "@octokit/plugin-throttling": "^11.0.5",
+        "@octokit/rest": "^22.0.1"
     },
     "devDependencies": {
         "@jubstaa/config": "^1.3.0",
+        "@types/node": "^26.6.6",
+        "esbuild": "^0.28.2",
         "eslint": "^10.15.0",
-        "prettier": "^3.6.2"
+        "prettier": "^3.10.1",
+        "typescript": "npm:@typescript/typescript6@^6.0.2",
+        "vitest": "^5.1.1"
     },
-    "packageManager": "npm@11.6.2"
+    "packageManager": "bun@1.4.4"
 }

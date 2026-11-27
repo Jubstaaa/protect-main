@@ -1,10 +1,11 @@
 import { node } from '@jubstaa/config/eslint/node'
-import { defineConfig } from 'eslint/config'
+import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
+    globalIgnores(['dist']),
     ...node({ tsconfigRootDir: import.meta.dirname }),
     {
-        files: ['bin/**', 'src/index.mjs'],
+        files: ['src/cli.ts'],
         rules: { 'no-console': 'off' },
     },
     {
