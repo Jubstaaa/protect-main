@@ -104,6 +104,14 @@ GITHUB_TOKEN=<token> npx github:Jubstaaa/protect-main --owner <account> --apply 
 
 Dry run unless you pass `--apply`. `--no-pull-request`, `--owner`, `--ruleset-name` and `--sample-pulls` match the action's inputs.
 
+## Releasing
+
+release-please cuts the release from the conventional commits on `main`, and a
+second job moves the `v1` tag onto it, so `@v1` keeps pointing at the newest
+release. The release pull request is opened with a personal access token rather
+than `GITHUB_TOKEN`, because a pull request opened with the built-in token does
+not start workflows, and its required checks would never report.
+
 ## License
 
 MIT
