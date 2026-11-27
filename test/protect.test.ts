@@ -16,22 +16,22 @@ const options: Options = {
 describe('discoverChecks', () => {
     test('samples at most the requested number of merged pull requests', async () => {
         const { api } = fakeApi({
-            checkRuns: {
+            heads: { app: ['one', 'two', 'three'] },
+            jobs: {
                 'app@one': [actionsRun('check'), actionsRun('image')],
                 'app@three': [actionsRun('check'), actionsRun('image')],
                 'app@two': [actionsRun('check')],
             },
-            heads: { app: ['one', 'two', 'three'] },
         })
         expect(await discoverChecks(api, 'app', 2)).toEqual(['check'])
     })
 
     test('a pull request with no runs is not counted as a sample', async () => {
         const { api } = fakeApi({
-            checkRuns: {
+            heads: { app: ['one', 'two'] },
+            jobs: {
                 'app@two': [actionsRun('check')],
             },
-            heads: { app: ['one', 'two'] },
         })
         expect(await discoverChecks(api, 'app', 3)).toEqual(['check'])
     })
@@ -45,8 +45,8 @@ describe('discoverChecks', () => {
 describe('protect', () => {
     test('creates a ruleset where there is none', async () => {
         const { api, written } = fakeApi({
-            checkRuns: { 'app@one': [actionsRun('check')] },
             heads: { app: ['one'] },
+            jobs: { 'app@one': [actionsRun('check')] },
         })
         const result = await protect(api, 'app', false, options)
         expect(result).toEqual({
@@ -60,8 +60,8 @@ describe('protect', () => {
 
     test('updates the ruleset it already created', async () => {
         const { api, written } = fakeApi({
-            checkRuns: { 'app@one': [actionsRun('check')] },
             heads: { app: ['one'] },
+            jobs: { 'app@one': [actionsRun('check')] },
             rulesets: { app: [{ id: 7, name: 'protect-main' }] },
         })
         const result = await protect(api, 'app', false, options)
@@ -98,8 +98,8 @@ describe('protect', () => {
 
     test('a dry run writes nothing', async () => {
         const { api, written } = fakeApi({
-            checkRuns: { 'app@one': [actionsRun('check')] },
             heads: { app: ['one'] },
+            jobs: { 'app@one': [actionsRun('check')] },
         })
         const result = await protect(api, 'app', false, {
             ...options,
@@ -128,5 +128,16 @@ describe('run', () => {
             'no administration access',
             'ok',
         ])
+    })
+})
+
+describe('read failures', () => {
+    test('a repository whose pull requests cannot be read is reported, not quietly left alone', async () => {
+        const { api, written } = fakeApi({ repos: ['locked'] })
+        api.mergedPullHeads = () =>
+            Promise.reject(new Error('403 Resource not accessible'))
+        const [result] = await run(api, options)
+        expect(result?.error).toContain('403')
+        expect(written).toHaveLength(0)
     })
 })

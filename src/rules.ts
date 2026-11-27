@@ -1,5 +1,4 @@
-export interface CheckRun {
-    app: null | { slug: string }
+export interface Job {
     conclusion: null | string
     name: string
 }
@@ -85,11 +84,8 @@ export function intersect(samples: Set<string>[]): string[] {
         .sort()
 }
 
-export function reportedChecks(runs: CheckRun[]): Set<string> {
+export function reportedChecks(jobs: Job[]): Set<string> {
     return new Set(
-        runs
-            .filter(run => run.app?.slug === 'github-actions')
-            .filter(run => run.conclusion !== 'skipped')
-            .map(run => run.name)
+        jobs.filter(job => job.conclusion !== 'skipped').map(job => job.name)
     )
 }

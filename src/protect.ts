@@ -28,13 +28,12 @@ export async function discoverChecks(
     repo: string,
     samplePulls: number
 ): Promise<string[]> {
-    const heads = await api.mergedPullHeads(repo).catch(() => [])
+    const heads = await api.mergedPullHeads(repo)
     const samples: Set<string>[] = []
 
     for (const sha of heads) {
         if (samples.length === samplePulls) break
-        const runs = await api.checkRuns(repo, sha).catch(() => [])
-        const names = reportedChecks(runs)
+        const names = reportedChecks(await api.jobs(repo, sha))
         if (names.size > 0) samples.push(names)
     }
 
