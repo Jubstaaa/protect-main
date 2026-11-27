@@ -1,0 +1,32 @@
+{
+    "name": "@jubstaa/protect-main",
+    "version": "0.0.0",
+    "description": "Keep a branch ruleset in step with the checks your pull requests actually report, across every repository.",
+    "license": "MIT",
+    "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Jubstaaa/protect-main.git"
+    },
+    "bin": {
+        "protect-main": "./bin/protect-main.mjs"
+    },
+    "files": [
+        "action.yml",
+        "bin",
+        "src"
+    ],
+    "scripts": {
+        "format": "prettier . --write",
+        "format:check": "prettier . --check",
+        "lint": "eslint .",
+        "test": "node --test test/",
+        "audit": "npm audit --audit-level=high"
+    },
+    "devDependencies": {
+        "@jubstaa/config": "^1.3.0",
+        "eslint": "^10.15.0",
+        "prettier": "^3.6.2"
+    },
+    "packageManager": "npm@11.6.2"
+}

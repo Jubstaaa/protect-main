@@ -1,0 +1,30 @@
+name: Protect main
+
+on:
+    schedule:
+        - cron: '17 6 * * *'
+    workflow_dispatch:
+        inputs:
+            apply:
+                description: Write the rulesets instead of only reporting them.
+                type: boolean
+                default: true
+
+permissions: {}
+
+concurrency:
+    group: protect-main
+    cancel-in-progress: false
+
+jobs:
+    protect:
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
+            - uses: ./
+              with:
+                  token: ${{ secrets.RULESET_TOKEN }}
+                  apply: ${{ github.event_name == 'schedule' || inputs.apply }}

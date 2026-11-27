@@ -1,0 +1,90 @@
+# protect-main
+
+Keep a branch ruleset in step with the checks your pull requests actually report, across every repository you own.
+
+Branch protection rots. You set it up once, then a workflow gets renamed, a job becomes a matrix, a repository is created and nobody remembers. This runs on a schedule and fixes all three.
+
+```yaml
+name: Protect main
+
+on:
+    schedule:
+        - cron: '0 6 * * *'
+    workflow_dispatch:
+
+permissions: {}
+
+jobs:
+    protect:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: Jubstaaa/protect-main@v1
+              with:
+                  token: ${{ secrets.RULESET_TOKEN }}
+                  apply: true
+```
+
+With no `repos`, it walks every repository the account owns — archived and forks excluded, private included — so a repository created tomorrow is protected without being named.
+
+## What it writes
+
+A ruleset named `protect-main` on each repository's default branch:
+
+- the branch cannot be deleted;
+- the branch cannot be force-pushed;
+- changes land through a pull request — **no approval is required**, so you can still merge your own work, but nothing reaches the default branch unreviewed by CI;
+- every check your pull requests report has to pass, and the branch has to be up to date.
+
+Set `require-pull-request: false` if you push to the default branch directly.
+
+## Where the required checks come from
+
+Not from your workflow files. The job key in `ci.yml` is only the reported name for a plain job — a matrix job or a reusable-workflow caller reports something else entirely:
+
+| in the workflow | what the pull request reports |
+| --------------- | ----------------------------- |
+| `quality-gate`  | `quality-gate (bun) / gate`   |
+| `app`           | `app (rust + typescript)`     |
+
+A ruleset that requires a context nobody reports blocks every pull request in that repository, permanently. So the contexts come from the **check runs of recently merged pull requests**, which is by definition what a pull request will report.
+
+Three rules keep that honest:
+
+- a check has to appear in **all** of the sampled pull requests (`sample-pulls`, 3 by default), so a job that only runs for Renovate never becomes required;
+- only GitHub Actions runs count, so a third-party app cannot block your merges by being removed from the repository;
+- skipped runs are ignored.
+
+And it never weakens what is already there: if nothing is discovered — a new repository, a quiet one — whatever the ruleset already requires is kept, and the repository still gets the deletion and force-push rules.
+
+## Inputs
+
+| Input                  | Default                        |                                                                                                                               |
+| ---------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `token`                | —                              | a token with **administration: write** on the repositories. `GITHUB_TOKEN` cannot do this and reaches only its own repository |
+| `owner`                | the running repository's owner | the account that owns the repositories                                                                                        |
+| `repos`                | all                            | repository names, whitespace or comma separated                                                                               |
+| `apply`                | `false`                        | write the ruleset; left false it only reports what it would do                                                                |
+| `require-pull-request` | `true`                         | require a pull request on the default branch                                                                                  |
+| `ruleset-name`         | `protect-main`                 | the ruleset it creates and keeps updated                                                                                      |
+| `sample-pulls`         | `3`                            | how many merged pull requests a check must appear in to become required                                                       |
+
+It writes the same report to the job summary, and fails the job if any repository errored.
+
+## The token
+
+Rulesets are an administration-scope write, and `GITHUB_TOKEN` has neither that scope nor any reach outside its own repository. Create a fine-grained personal access token with **Administration: Read and write** on the repositories you want covered — or on all of them, so new ones are included — and store it as a secret.
+
+Nothing else is needed; the token is the only credential, and it never leaves the runner.
+
+## From the command line
+
+```sh
+GITHUB_TOKEN=<token> npx @jubstaa/protect-main --all
+GITHUB_TOKEN=<token> npx @jubstaa/protect-main --apply my-repo other-repo
+```
+
+Dry run unless you pass `--apply`. `--no-pull-request`, `--owner`, `--ruleset-name` and `--sample-pulls` match the action's inputs.
+
+## License
+
+MIT

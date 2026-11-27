@@ -1,0 +1,18 @@
+name: CI
+
+on:
+    pull_request:
+
+permissions:
+    contents: read
+
+jobs:
+    check:
+        uses: Jubstaaa/deploy-actions/.github/workflows/quality-gate.yml@f4677f5a29993bfe38facdc282c50ddd1edc9936 # v1.7.0
+        with:
+            runtime: node
+            build: false
+            typecheck: false
+            knip: false
+            jscpd: false
+            depcruise: false

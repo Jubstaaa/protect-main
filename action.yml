@@ -1,0 +1,40 @@
+name: Protect main
+description: Keep a branch ruleset in step with the checks your pull requests actually report, across every repository.
+author: Jubstaaa
+
+inputs:
+    token:
+        description: A token with administration write on the repositories. GITHUB_TOKEN cannot do this, and reaches only its own repository.
+        required: true
+    owner:
+        description: The account that owns the repositories. Defaults to the owner of the repository running this.
+        required: false
+        default: ''
+    repos:
+        description: Repository names, whitespace or comma separated. Empty means every repository the account owns, archives and forks excluded.
+        required: false
+        default: ''
+    apply:
+        description: Write the ruleset. Left false it only reports what it would do.
+        required: false
+        default: 'false'
+    require-pull-request:
+        description: Require a pull request to land on the default branch. No approval is required, so you can still merge your own.
+        required: false
+        default: 'true'
+    ruleset-name:
+        description: Name of the ruleset to create and keep updated.
+        required: false
+        default: protect-main
+    sample-pulls:
+        description: How many recently merged pull requests a check must appear in to become required.
+        required: false
+        default: '3'
+
+runs:
+    using: node24
+    main: src/index.mjs
+
+branding:
+    icon: shield
+    color: green
