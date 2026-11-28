@@ -91,7 +91,12 @@ It writes the same report to the job summary, and fails the job if any repositor
 
 ## The token
 
-Rulesets are an administration-scope write, and `GITHUB_TOKEN` has neither that scope nor any reach outside its own repository. Create a fine-grained personal access token on the repositories you want covered — or on all of them, so new ones are included — with three repository permissions, and store it as a secret:
+Rulesets are an administration-scope write, and `GITHUB_TOKEN` has neither that scope nor any reach outside its own repository. Use a **GitHub App** rather than a personal access token: a fine-grained token
+cannot gain an expiry once created, so it lives for ever, while an App mints one
+that lasts an hour and is revoked when the job ends.
+
+Install the App on the repositories you want covered — or on all of them, so new
+ones are included — with three repository permissions:
 
 | Permission                         | Why                                       |
 | ---------------------------------- | ----------------------------------------- |
@@ -99,8 +104,11 @@ Rulesets are an administration-scope write, and `GITHUB_TOKEN` has neither that 
 | **Pull requests: Read**            | finding the recently merged pull requests |
 | **Checks: Read**                   | reading what those pull requests reported |
 
-A token with only the first works on public repositories, because their pull
+Granting only the first works on public repositories, because their pull
 requests are readable by anyone, and returns 403 on every private one.
+
+A personal access token with the same three permissions still works; it just
+never expires.
 
 Nothing else is needed; the token is the only credential, and it never leaves the runner.
 
