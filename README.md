@@ -18,9 +18,17 @@ jobs:
     protect:
         runs-on: ubuntu-latest
         steps:
+            - id: app
+              uses: actions/create-github-app-token@v3
+              with:
+                  app-id: ${{ vars.APP_ID }}
+                  private-key: ${{ secrets.APP_PRIVATE_KEY }}
+                  permission-administration: write
+                  permission-pull-requests: read
+                  permission-actions: read
             - uses: Jubstaaa/protect-main@v1
               with:
-                  token: ${{ secrets.RULESET_TOKEN }}
+                  token: ${{ steps.app.outputs.token }}
                   apply: true
 ```
 
@@ -105,7 +113,7 @@ ones are included — with three repository permissions:
 | ---------------------------------- | ----------------------------------------- |
 | **Administration: Read and write** | the ruleset itself                        |
 | **Pull requests: Read**            | finding the recently merged pull requests |
-| **Checks: Read**                   | reading what those pull requests reported |
+| **Actions: Read**                  | reading the jobs those pull requests ran  |
 
 Granting only the first works on public repositories, because their pull
 requests are readable by anyone, and returns 403 on every private one.
@@ -128,9 +136,9 @@ Dry run unless you pass `--apply`. `--no-pull-request`, `--owner`, `--ruleset-na
 
 release-please cuts the release from the conventional commits on `main`, and a
 second job moves the `v1` tag onto it, so `@v1` keeps pointing at the newest
-release. The release pull request is opened with a personal access token rather
-than `GITHUB_TOKEN`, because a pull request opened with the built-in token does
-not start workflows, and its required checks would never report.
+release. The release pull request is opened with a token minted from a GitHub App
+rather than `GITHUB_TOKEN`, because a pull request opened with the built-in token
+does not start workflows, and its required checks would never report.
 
 ## License
 
