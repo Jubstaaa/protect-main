@@ -20,6 +20,14 @@ export interface RepoRef {
 
 const Throttled = Octokit.plugin(throttling)
 
+interface RepoListing {
+    archived: boolean
+    fork: boolean
+    name: string
+    owner: { login: string }
+    private: boolean
+}
+
 export function createApi(token: string, owner: string): Api {
     const octokit = new Throttled({
         auth: token,
@@ -67,9 +75,12 @@ export function createApi(token: string, owner: string): Api {
                 .map(pull => pull.head.sha)
         },
         ownRepos: async () => {
-            const repos = await octokit.paginate(
-                octokit.repos.listForAuthenticatedUser,
-                { affiliation: 'owner', per_page: 100 }
+            const repos = await installationRepos(octokit).catch(
+                async () =>
+                    await octokit.paginate(
+                        octokit.repos.listForAuthenticatedUser,
+                        { affiliation: 'owner', per_page: 100 }
+                    )
             )
 
             return repos
@@ -118,4 +129,12 @@ export function createApi(token: string, owner: string): Api {
             )
         },
     }
+}
+
+async function installationRepos(
+    octokit: InstanceType<typeof Throttled>
+): Promise<RepoListing[]> {
+    return octokit.paginate(octokit.apps.listReposAccessibleToInstallation, {
+        per_page: 100,
+    })
 }
