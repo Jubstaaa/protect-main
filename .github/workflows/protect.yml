@@ -24,7 +24,13 @@ jobs:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   persist-credentials: false
+            - id: app
+              uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+              with:
+                  app-id: ${{ vars.RULESET_APP_ID }}
+                  private-key: ${{ secrets.RULESET_APP_PRIVATE_KEY }}
+                  owner: ${{ github.repository_owner }}
             - uses: ./
               with:
-                  token: ${{ secrets.RULESET_TOKEN }}
+                  token: ${{ steps.app.outputs.token }}
                   apply: ${{ github.event_name == 'schedule' || inputs.apply }}
