@@ -5675,9 +5675,11 @@ function createApi(token2, owner2) {
       return data.filter((pull) => pull.merged_at !== null).map((pull) => pull.head.sha);
     },
     ownRepos: async () => {
-      const repos = await octokit.paginate(
-        octokit.repos.listForAuthenticatedUser,
-        { affiliation: "owner", per_page: 100 }
+      const repos = await installationRepos(octokit).catch(
+        async () => await octokit.paginate(
+          octokit.repos.listForAuthenticatedUser,
+          { affiliation: "owner", per_page: 100 }
+        )
       );
       return repos.filter((repo) => !repo.archived && !repo.fork).filter(
         (repo) => repo.owner.login.toLowerCase() === owner2.toLowerCase()
@@ -5714,6 +5716,11 @@ function createApi(token2, owner2) {
       );
     }
   };
+}
+async function installationRepos(octokit) {
+  return octokit.paginate(octokit.apps.listReposAccessibleToInstallation, {
+    per_page: 100
+  });
 }
 
 // src/rules.ts

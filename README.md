@@ -24,7 +24,10 @@ jobs:
                   apply: true
 ```
 
-With no `repos`, it walks every repository the account owns — archived and forks excluded, private included — so a repository created tomorrow is protected without being named.
+With no `repos`, it walks every repository it can reach — archived and forks
+excluded, private included — so a repository created tomorrow is protected
+without being named. Running as an App that means the installation's
+repositories, and as a personal access token the ones the account owns.
 
 ## What it writes
 
