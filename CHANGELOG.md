@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/Jubstaaa/protect-main/compare/v1.1.0...v1.1.1) (2026-11-28)
+
+
+### Bug Fixes
+
+* show the App token and the Actions permission in the README ([#9](https://github.com/Jubstaaa/protect-main/issues/9)) ([e6f9e58](https://github.com/Jubstaaa/protect-main/commit/e6f9e58913a3e7919e4b8a4a0bb7432816b9dfcb))
+
 ## [1.1.0](https://github.com/Jubstaaa/protect-main/compare/v1.0.0...v1.1.0) (2026-11-28)
 
 
