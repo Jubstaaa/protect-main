@@ -1,6 +1,6 @@
 {
     "name": "@jubstaa/protect-main",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Keep a branch ruleset in step with the checks your pull requests actually report, across every repository.",
     "license": "MIT",
     "type": "module",
